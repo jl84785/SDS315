@@ -5,7 +5,7 @@ date: "2025-02-08"
 output: html_document
 ---
 
-##  [GithubLink](https://github.com/jl84785/SDS315/blob/main/hw2.Rmd)
+##  [GithubLink](https://github.com/jl84785/SDS315/blob/main/hw3.Rmd)
 
 # Question 1
 
