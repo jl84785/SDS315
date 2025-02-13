@@ -1,0 +1,168 @@
+---
+title: "HW3"
+author: "Joy Lin (Jl84785)"
+date: "2025-02-08"
+output: html_document
+---
+
+##  [GithubLink](https://github.com/jl84785/SDS315/blob/main/hw2.Rmd)
+
+# Question 1
+
+## Part 1
+
+```{r warning=FALSE, echo=FALSE}
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+suppressMessages(library(mosaic))
+ gas_price<-read.csv("GasPrices.csv")
+
+Competition = do(10000)*diffmean(Price ~ Competitors,
+data=resample(gas_price))
+ggplot(Competition,aes(x=diffmean))+geom_histogram(binwidth=.005)+labs(title = "Bootstrapping Sampling Distribution for Differences in Mean Gas Prices Between Gas Stations with Competitors and Without")
+confint(Competition, level = 0.95)
+```
+
+Theory: Gas stations charge more if they lack direct competition in sight.
+The 95% confidence interval for the price difference between gas stations with and without competition ranges from -0.055 to 0.0082. Since this interval includes zero, it suggests that the price difference could be due to random variation. The price difference could range from a 5.5 cent difference to an 0.82 cent increase difference, meaning no consistent trend is evident. Because the confidence interval includes zero, there is insufficient evidence to conclude that lack of competition leads to higher gas prices. This theory is rejected.
+
+
+## Part 2
+
+```{r warning=FALSE, echo=FALSE}
+income_pricing = do(10000)*cor(Price ~ Income,
+data=resample(gas_price))
+ggplot(income_pricing,aes(x=cor))+geom_histogram(binwidth=.05)+labs(title = "Bootstrapping Sampling Distribution for Relationship  \nBetween Price and Income")
+confint(income_pricing, level = 0.95)
+```
+
+Theory: The richer the area, the higher the gas prices.
+The data shows a positive relationship between income levels and gas prices, with the 95% confidence interval for this relationship ranging from 0.2 to 0.57. Since the entire interval doesn't include zero, it suggests that higher-income areas tend to have higher gas prices. This supports the theory that richer areas have higher gas prices.
+
+## Part 3
+
+```{r warning=FALSE, echo=FALSE}
+stoplight_price = do(10000)*diffmean(Price ~ Stoplight,
+data=resample(gas_price))
+ggplot(stoplight_price,aes(x=diffmean))+geom_histogram(binwidth=.005)+labs(title = "Bootstrapping Sampling Distribution for Differences in Mean \nGas Prices Between Gas Stations next to Stoplight and Not.")
+confint(stoplight_price, level = 0.95)
+```
+
+Theory: Gas stations at stoplights charge more.
+The 95% confidence interval for the price difference between gas stations at stoplights and those without stoplights ranges from -0.39 to 0.31. Since this interval includes zero indicating that there is no consistent difference in gas prices between the two types of locations. The fact that zero is within the interval suggests that any observed price differences are likely due to random variation rather than a true effect of stoplight presence. The theory that gas stations at stoplights charge more is not supported by the data.
+
+## Part 4
+
+```{r warning=FALSE, echo=FALSE}
+Highway_price = do(10000)*diffmean(Price ~ Highway,
+data=resample(gas_price))
+ggplot(Highway_price,aes(x=diffmean))+geom_histogram(binwidth=.005)+labs(title = "Bootstrapping Sampling Distribution for Differences in Mean Gas Prices \nBetween Gas Stations next to Highway and Not.")
+confint(Highway_price, level = 0.95)
+```
+
+Theory: Gas stations with direct highway access charge more. 
+The 95% confidence interval for the price difference between gas stations with and without highway access ranges from 0.00091 to 0.0081 and because zero is not included in this interval, it indicates a statistically significant positive difference. This suggests that highway access is associated with slightly higher gas prices. However, the price difference is very small, ranging from 0.09 cents to 0.81 cents. While this is a statistically significant finding, the actual increase in price is minimal. While the theory is supported, the practical significance of the price difference is low.
+
+## Part 5
+```{r warning=FALSE, echo=FALSE}
+gas_price$brand_group <- ifelse(gas_price$Brand == "Shell", "Shell", "Other")
+Brands = do(10000)*diffmean(Price ~ brand_group,
+data=resample(gas_price))
+ggplot(Brands,aes(x=diffmean))+geom_histogram(binwidth=.005)+labs(title = "Bootstrapping Sampling Distribution for Differences in Mean Gas Prices \nBetween the Bran Shells and Others")
+confint(Brands, level = 0.95)
+```
+
+Theory:Shell charges more than all other non-Shell brands.
+The 95% confidence interval for the price difference between Shell and other gas stations ranges from -0.01 to 0.065. Since this interval includes zero, it suggests that the price difference could be due to random variation since there is no consistent price difference between Shell and these other brands. Because zero is included in the confidence interval, it indicates that we cannot confidently say Shell charges higher prices than other brands. The theory is not supported by the data.
+
+# Question 2
+
+## Part A
+
+```{r warning=FALSE, echo=FALSE}
+sclass<-read.csv("sclass.csv")
+sclass1 <- sclass %>%
+  filter(year == 2011, trim == '63 AMG')
+
+sclass2 = do(10000)*mean(resample(sclass1$mileage))
+ggplot(sclass2,aes(x=mean))+geom_histogram(binwidth=100)+labs(title = "Bootstrapping Sampling Distribution for mean of Mileage of Mercedes that \nwas bought in 2011 and is trim 63 AMG")
+confint(sclass2, level = 0.95)
+```
+
+We are 95% confident that the mileage of a S-class Mercedes bought in 2011 with trim 63 AMG is between 26280 and 31800.
+
+## Part B
+
+```{r warning=FALSE, echo=FALSE}
+
+sclass3<-sclass%>%
+  filter(year == 2014, trim == 550)
+sclass3$isBlack <- ifelse(sclass3$color == "Black",TRUE, FALSE )
+
+sclass4 = do(10000)*prop(resample(sclass3$isBlack))
+ggplot(sclass4, aes(x=prop_TRUE))+geom_histogram(binwidth=.005)+labs(title = "Bootstrapping Sampling Distribution for Proportions of Mercedes That \nCame from 2014 with Trim 550 That are Black.")
+confint(sclass4, level = .95)                          
+                                                 
+                                                 
+```
+
+We are 95% confident that the proportion of a S-class Mercede bought in 2014 with trim 550 being black is between .42 and .45.
+
+# Question 3
+
+## Part 1
+
+```{r warning=FALSE, echo=FALSE}
+pilot_survey<-read.csv("nbc_pilotsurvey.csv")
+pilot_survey1<-pilot_survey %>% 
+  filter(Show == "Living with Ed" | Show == "My Name is Earl")
+pilot_survey2 = do(10000)*diffmean(Q1_Happy~Show, data=resample(pilot_survey1))
+ggplot(pilot_survey2, aes(x=diffmean))+geom_histogram(bindwidth=.005)+labs(title = "Bootstrapping Sampling Distribution for Difference in Mean of Happy \nRatings Between The shows Living with Ed and My Name is Earl")
+confint(pilot_survey2, level = .95)
+```
+
+We are trying to answer if there is a difference in happy rating for the shows Living with Ed and My name is Earl. I had to first filter out the data with these two shows then I bootstrapped the differences between the ratings. The difference in happy ratings of the bootstrapped sampling distribution is between -.39 and .1 with 95% confidence. Because 0 is includes in this interval, there is no evidence that suggest that one of the shows had higher happy ratings than the other.
+
+## Part 2
+```{r warning=FALSE, echo=FALSE}
+pilot_survey3<-pilot_survey %>% 
+  filter(Show == "The Biggest Loser" | Show == "The Apprentice: Los Angeles")
+pilot_survey4 = do(10000)*diffmean(Q1_Annoyed~Show, data=resample(pilot_survey3))
+ggplot(pilot_survey4, aes(x=diffmean))+geom_histogram(bindwidth=.005)+labs(title = "Bootstrapping Sampling Distribution for differences of means of Annoyed Ratings \nbetween the Shows The Biggest Losers and The Apperentice: Los Angelos")
+confint(pilot_survey4, level=.95)
+```
+
+We are trying to figure out if the shows The Biggest Loser and The Apprentice:Los Angelos have a difference in their annoyed ratings. After filtering the shows, I bootstrapped the differences between these Annoyed Ratings.We are 95% confident that the difference between the annoyed ratings between these shows is between -.5 to -.02. Because 0 is not included in this interval, the question that if there was a difference between the two shows's annoyed rating is supported by the data.
+
+## Part 3
+
+```{r warning=FALSE, echo=FALSE}
+pilot_survey4<-pilot_survey %>%
+  filter(Show == "Dancing with the Stars")
+pilot_survey4$Confusing <- ifelse(pilot_survey4$Q2_Confusing >3 ,TRUE, FALSE )
+pilot_survey5=do(10000)*prop(resample(pilot_survey4$Confusing))
+ggplot(pilot_survey5, aes(x=prop_TRUE))+geom_histogram(binwidth=.0059)+labs(title = "Bootstrapping Sampling Distribution for if Someone was Confused or Not watching the Dancing with the Stars.")
+confint(pilot_survey5, level=.95)
+```
+
+The question we are answering is if the shows Dancing with the Stars is confusing by assigning the rating 4 or 5 of being confused to just meaning that they were confused. 1-3 would indicate that they were not confused. Like all of the other question, I bootstraped the proportions of the people who thought it was confusing over the total people. We are 95% confidence that the percentage of people who were confused is around .03 to .12 percent. This suggest that most people did not find this Movie confusing.
+
+# Question 4
+
+
+
+```{r warning=FALSE, echo=FALSE}
+
+ebay<- read.csv("ebay.csv")
+ebay$ratio<-ebay$rev_after/ebay$rev_before
+ebay1=do(10000)*diffmean(ratio~adwords_pause,data=resample(ebay))
+ggplot(ebay1,aes(x=diffmean))+geom_histogram(binwidth=.005)+labs(title = "Bootstrapping Sampling Distribution for Differences in Mean of Ratios(Money) \nBetween the Test Groups With Pauses on Ads vs Those Who Didn't Pause")
+confint(ebay1, level=.95)
+
+```
+
+
+We are trying to figure out if the revenue ratio between control and treatment groups have a difference. I bootstrapped the differences of the ratios between the control and treament groups. 1 indicating treatment group and 0 indicating control. We are 95% confident that the difference between the treatment group and the control group is around -.091 to -.013. This support the fact that paid search advertising on Google creates extra revenure for Ebay. 
+
+
+
