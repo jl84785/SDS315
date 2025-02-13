@@ -24,7 +24,7 @@ confint(Competition, level = 0.95)
 ```
 
 Theory: Gas stations charge more if they lack direct competition in sight.
-The 95% confidence interval for the price difference between gas stations with and without competition ranges from -0.055 to 0.0082. Since this interval includes zero, it suggests that the price difference could be due to random variation. The price difference could range from a 5.5 cent difference to an 0.82 cent increase difference, meaning no consistent trend is evident. Because the confidence interval includes zero, there is insufficient evidence to conclude that lack of competition leads to higher gas prices. This theory is rejected.
+The 95% confidence interval for the price difference between gas stations with and without competitors ranges from -0.055 to 0.0081. Since zero is included in this interval, it indicates that the observed price difference is probably not because of the competition. The price difference could range from a 5.5 cent difference to an 0.81 cent increase difference, meaning no consistent trend is evident. Because the confidence interval includes zero, there is insufficient evidence to conclude that lack of competition leads to higher gas prices. This theory is rejected.
 
 
 ## Part 2
@@ -49,7 +49,7 @@ confint(stoplight_price, level = 0.95)
 ```
 
 Theory: Gas stations at stoplights charge more.
-The 95% confidence interval for the price difference between gas stations at stoplights and those without stoplights ranges from -0.39 to 0.31. Since this interval includes zero indicating that there is no consistent difference in gas prices between the two types of locations. The fact that zero is within the interval suggests that any observed price differences are likely due to random variation rather than a true effect of stoplight presence. The theory that gas stations at stoplights charge more is not supported by the data.
+The 95% confidence interval for the price difference between gas stations at stoplights and those without stoplights is -0.39 to 0.31. Since this range includes zero, it tells us that there’s no clear difference in gas prices between these two types of locations. Because zero is in this range, it means that the price differences we see are likely due to some sort of variation rather than being the real effect of being located at a stoplight. The idea that gas stations at stoplights charge more is not supported by the data.
 
 ## Part 4
 
@@ -117,7 +117,7 @@ pilot_survey<-read.csv("nbc_pilotsurvey.csv")
 pilot_survey1<-pilot_survey %>% 
   filter(Show == "Living with Ed" | Show == "My Name is Earl")
 pilot_survey2 = do(10000)*diffmean(Q1_Happy~Show, data=resample(pilot_survey1))
-ggplot(pilot_survey2, aes(x=diffmean))+geom_histogram(bindwidth=.005)+labs(title = "Bootstrapping Sampling Distribution for Difference in Mean of Happy \nRatings Between The shows Living with Ed and My Name is Earl")
+ggplot(pilot_survey2, aes(x=diffmean))+geom_histogram(binwith=.005)+labs(title = "Bootstrapping Sampling Distribution for Difference in Mean of Happy \nRatings Between The shows Living with Ed and My Name is Earl")
 confint(pilot_survey2, level = .95)
 ```
 
@@ -128,7 +128,7 @@ We are trying to answer if there is a difference in happy rating for the shows L
 pilot_survey3<-pilot_survey %>% 
   filter(Show == "The Biggest Loser" | Show == "The Apprentice: Los Angeles")
 pilot_survey4 = do(10000)*diffmean(Q1_Annoyed~Show, data=resample(pilot_survey3))
-ggplot(pilot_survey4, aes(x=diffmean))+geom_histogram(bindwidth=.005)+labs(title = "Bootstrapping Sampling Distribution for differences of means of Annoyed Ratings \nbetween the Shows The Biggest Losers and The Apperentice: Los Angelos")
+ggplot(pilot_survey4, aes(x=diffmean))+geom_histogram(binwidth=.05)+labs(title = "Bootstrapping Sampling Distribution for differences of means of Annoyed Ratings \nbetween the Shows The Biggest Losers and The Apperentice: Los Angelos")
 confint(pilot_survey4, level=.95)
 ```
 
@@ -145,7 +145,7 @@ ggplot(pilot_survey5, aes(x=prop_TRUE))+geom_histogram(binwidth=.0059)+labs(titl
 confint(pilot_survey5, level=.95)
 ```
 
-The question we are answering is if the shows Dancing with the Stars is confusing by assigning the rating 4 or 5 of being confused to just meaning that they were confused. 1-3 would indicate that they were not confused. Like all of the other question, I bootstraped the proportions of the people who thought it was confusing over the total people. We are 95% confidence that the percentage of people who were confused is around .03 to .12 percent. This suggest that most people did not find this Movie confusing.
+The question we are answering is if the show Dancing with the Stars is confusing by assigning the rating 4 or 5 of being confused to just meaning that they were confused. 1-3 would indicate that they were not confused. Like all of the other questions, I bootstrapped the proportions of the people who thought it was confusing over the total people. We are 95% confident that the percentage of people who were confused is around .03 to .12 percent. This suggests that most people did not find this Movie confusing.
 
 # Question 4
 
@@ -162,7 +162,8 @@ confint(ebay1, level=.95)
 ```
 
 
-We are trying to figure out if the revenue ratio between control and treatment groups have a difference. I bootstrapped the differences of the ratios between the control and treament groups. 1 indicating treatment group and 0 indicating control. We are 95% confident that the difference between the treatment group and the control group is around -.091 to -.013. This support the fact that paid search advertising on Google creates extra revenure for Ebay. 
+We are trying to figure out if the revenue ratio between control and treatment groups have a difference. I bootstrapped the differences of the ratios between the control and treatment groups. 1 indicating treatment group and 0 indicating control. We are 95% confident that the difference between the treatment group and the control group is around -.091 to -.013. This supports the fact that paid search advertising on Google creates extra revenue for Ebay.
+
 
 
 
