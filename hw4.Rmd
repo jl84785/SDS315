@@ -1,0 +1,190 @@
+---
+title: "hw4"
+author: "Joy Lin (jl84785)"
+date: "2025-02-19"
+output: html_document
+---
+
+[Github]()
+
+# Question 1
+
+
+```{r echo=FALSE, warning=FALSE}
+suppressMessages(library(mosaic))
+SEC = do(100000)*nflip(n=2021, prob = .024)
+ggplot(SEC, aes(x=nflip))+geom_histogram(binwidth=2)+labs(title="Distribution of amount of flips that happened with 2.4%")
+sum(count(SEC >=70)/100000)
+```
+
+The Null hypothesis is that the percentage of legal trades that are flagged is 2.4% . The test statistics we used to prove against the null hypothesis is that 70 out of 2021 (~3.46%) legal trades were flagged. Using the popular convention of a = .05, it is apparent to think that the null hypothesis is not plausible as the p-value of around .002 is less than .05. Because of this, we can raise some suspicions of how Iron Bank conducts their trade.
+
+# Question 2
+
+```{r echo=FALSE, warning=FALSE}
+G_Bites = do(100000)*nflip(n=50,prob = .03)
+ggplot(G_Bites, aes(x=nflip))+geom_histogram(binwidth =1 )+labs(title="Distribution of Flips That Happened When the Chances are 3%")
+sum(count(G_Bites>=8)/100000)
+```
+
+The Null hypothesis is that the percentage of the health violations all restaurant in the city is around 3%. The test statistics is that a specific restaurant in the city has violated 8/50 (16%) health code violations. Is this test statistics out of the ordinary, or should the Health Department take action? Using popular convention again of a=.05, it is apparent that the null hypothesis is not plausible for this specific restaurant as the p value is around .0015 which is less than the a convention. The Health Department has enough evidence to check up on Gourmet Bites.
+
+
+# Question 3
+
+```{r echo=FALSE, warning=FALSE}
+
+expected_dis= c(G1=.3, G2=.25, G3=.2,G4=.15,G5=.1)
+observed_count= c(G1=85, G2=56, G3=59, G4=27, G5=13)
+total=85+56+59+27+13
+
+tibble(observed=observed_count,expected_dis*240)
+
+chi_squared = function(observed, expected){
+  sum((observed-expected)^2/expected)
+  
+}
+chi_jury=chi_squared(observed_count, expected_dis*240)
+
+chi_jury1=do(100000)*{
+  sim_jury=rmultinom(1, total, expected_dis*total)
+  Jury_stat=chi_squared(sim_jury, expected_dis*total)
+}
+
+ggplot(chi_jury1,aes(x=result))+geom_histogram(binwidth=1)+labs(title="Distrbution of X^2 of the Chi Squared Test ")
+sum(count(chi_jury1>=chi_jury))/100000
+
+```
+
+The null hypothesis is that the specific judge has similar jury representation as with groups that the Judge can choose from. The test statistics is the observed counts of all the different groups of juries that the judge has chosen. We are trying to figure out if this coincides with the actual amount of percentages of juries that the Judge can choose from. After bootstrapping the percentages of juries of each group, we got a p value of .0138. And because of convention of using a=.05, and the fact that the P-value in this situation is less, we can conclude that the null hypothesis is not plausible. It seems that there is some systematic bias for this particular judge. There could be other explanations such as sex. This means that the Judge chooses base on sex, and the group that gets lower representation might just had more males than female (vice versa). This could suggest that it wasn't a systmatic bias between groups but between sex. In order to investigate further, we would have to remove all of these confounding variables. Sex is just one of them , and we could block all of the sex in the groups and randomly choose. 
+
+# Question 4
+
+## A
+
+```{r echo=FALSE, warning=FALSE}
+library(stringr)
+letter=read.csv("letter_frequencies.csv")
+brown=readLines("brown_sentences.txt")
+
+
+
+calculate_chi_squared = function(sentences, freq_table) {
+  
+  freq_table$Probability = freq_table$Probability / sum(freq_table$Probability)
+  
+  chi_squared_values = sapply(sentences, function(sentence) {
+    
+    clean_sentence = gsub("[^A-Za-z]", "", sentence)
+    clean_sentence = toupper(clean_sentence)
+    
+    observed_counts = table(factor(strsplit(clean_sentence, "")[[1]], levels = freq_table$Letter))
+    
+    total_letters = sum(observed_counts)
+    expected_counts = total_letters * freq_table$Probability
+    
+    chi_squared_stat = sum((observed_counts - expected_counts)^2 / expected_counts, na.rm = TRUE)
+    
+    return(chi_squared_stat)
+  })
+  
+  return(chi_squared_values)
+}
+
+chi_brown = calculate_chi_squared(brown, letter)
+
+chi_brown = as.data.frame(chi_brown)
+
+ggplot(chi_brown,aes(x=chi_brown))+geom_histogram(binwidth=10)+labs(title="Distribution of X^2 of the Chi Squared Test Regarding the Appearance\n of each Letters.")
+```
+
+## B
+
+
+
+```{r echo=FALSE, warning=FALSE}
+
+p1 = round(sum(count(chi_brown>=calculate_chi_squared("She opened the book and started to read the first chapter, eagerly anticipating what might come next.",letter)))/nrow(chi_brown),3)
+```
+
+
+
+```{r echo=FALSE, warning=FALSE}
+p2 = round(sum(count(chi_brown>=calculate_chi_squared("Despite the heavy rain, they decided to go for a long walk in the park, crossing the main avenue by the fountain in the center.",letter)))/nrow(chi_brown),3)
+```
+
+
+
+```{r echo=FALSE, warning=FALSE}
+p3 = round(sum(count(chi_brown>=calculate_chi_squared("The museum’s new exhibit features ancient artifacts from various civilizations around the world.",letter)))/nrow(chi_brown),3)
+```
+
+
+
+```{r echo=FALSE, warning=FALSE}
+p4= round(sum(count(chi_brown>=calculate_chi_squared("He carefully examined the document, looking for any clues that might help solve the mystery.",letter)))/nrow(chi_brown),3)
+
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+p5 = round(sum(count(chi_brown>=calculate_chi_squared("The students gathered in the auditorium to listen to the guest speaker’s inspiring lecture.",letter)))/nrow(chi_brown),3)
+```
+
+
+
+```{r echo=FALSE, warning=FALSE}
+p6 = round(sum(count(chi_brown>=calculate_chi_squared("Feeling vexed after an arduous and zany day at work, she hoped for a peaceful and quiet evening at home, cozying up after a quick dinner with some TV, or maybe a book on her upcoming visit to Auckland." ,letter)))/nrow(chi_brown),3)
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+p7 = round(sum(count(chi_brown>=calculate_chi_squared("The chef demonstrated how to prepare a delicious meal using only locally sourced ingredients, focusing mainly on some excellent dinner recipes from Spain.",letter)))/nrow(chi_brown),3)
+```
+
+
+
+```{r echo=FALSE, warning=FALSE}
+p8 = round(sum(count(chi_brown>=calculate_chi_squared("They watched the sunset from the hilltop, marveling at the beautiful array of colors in the sky.",letter)))/nrow(chi_brown),3)
+```
+
+```{r echo=FALSE, warning=FALSE}
+p9 = round(sum(count(chi_brown>=calculate_chi_squared("The committee reviewed the proposal and provided many points of useful feedback to improve the project’s effectiveness.",letter)))/nrow(chi_brown),3)
+```
+
+
+```{r echo=FALSE, warning=FALSE}
+p10 = round(sum(count(chi_brown>=calculate_chi_squared("Despite the challenges faced during the project, the team worked tirelessly to ensure its successful completion, resulting in a product that exceeded everyone’s expectations.",letter)))/nrow(chi_brown),3)
+```
+
+
+
+```{r echo=FALSE, warning=FALSE}
+suppressMessages(library(kableExtra))
+sentences <- c(
+  "She opened the book and started to read the first chapter, eagerly anticipating what might come next.",
+  "Despite the heavy rain, they decided to go for a long walk in the park, crossing the main avenue by the fountain in the center.",
+  "The museum’s new exhibit features ancient artifacts from various civilizations around the world.",
+  "He carefully examined the document, looking for any clues that might help solve the mystery.",
+  "The students gathered in the auditorium to listen to the guest speaker’s inspiring lecture.",
+  "Feeling vexed after an arduous and zany day at work, she hoped for a peaceful and quiet evening at home, cozying up after a quick dinner with some TV, or maybe a book on her upcoming visit to Auckland.",
+  "The chef demonstrated how to prepare a delicious meal using only locally sourced ingredients, focusing mainly on some excellent dinner recipes from Spain.",
+  "They watched the sunset from the hilltop, marveling at the beautiful array of colors in the sky.",
+  "The committee reviewed the proposal and provided many points of useful feedback to improve the project’s effectiveness.",
+  "Despite the challenges faced during the project, the team worked tirelessly to ensure its successful completion, resulting in a product that exceeded everyone’s expectations."
+)
+P<- c( p1,p2,p3,p4,p5,p6,p7,p8,p9,p10)
+
+sentences <- data.frame( Sentence = sentences, PValue= P)
+
+
+kbl(sentences) %>% kable_paper(full_width = T, html_font = "Cambria") %>% kable_styling(bootstrap_options = c("striped","hover","condensed","responsive"))
+
+
+```
+
+Sentence 6 is very likely to be the one that is created by the LLM. Because the p value of around .009 is less than .05 (normal convention) by a lot. All the other sentences has P values close or way above .05, implying that the frequency distribution of each letter is around the same as null distribution of all letters in normal writing.
+
+
+
+
