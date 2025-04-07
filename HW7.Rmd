@@ -1,0 +1,111 @@
+---
+title: "HW7"
+author: "Joy Lin"
+date: "2025-04-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(mosaic)
+library(dplyr)
+library(MatchIt)
+#A
+arm <- read.csv("armfold.csv")
+
+females = sum(arm$Sex=="Female")
+females
+males = sum(arm$Sex =="Male")
+males
+maleprop=sum(arm$LonR_fold == 1 & arm$Sex=="Male")/males
+maleprop
+femaleprop=sum(arm$LonR_fold == 1 & arm$Sex=="Female")/females
+femaleprop
+
+#B
+diffprop=maleprop-femaleprop
+diffprop
+prop.test(LonR_fold ~ Sex, data= arm)
+# prop(resample(arm[arm$Sex == "Male", ]$Lon_fold == 1))
+
+#C
+DIFF = do(5000)*(
+  prop(resample(arm[arm$Sex == "Male", ]$LonR_fold == 1))-
+  prop(resample(arm[arm$Sex == "Female", ]$LonR_fold == 1)))
+
+result = confint (DIFF, level=0.95)
+result
+
+
+
+#D
+
+```
+
+```{r}
+#2
+turnout <- read.csv("turnout.csv")
+#A
+prop(turnout[turnout$GOTV_call == 1, ]$voted1998 == 1)
+
+prop(turnout[turnout$GOTV_call == 0, ]$voted1998 == 1)
+
+DIFF = do(5000)*(
+  prop(resample(turnout[turnout$GOTV_call == 1, ]$voted1998 == 1))-
+  prop(resample(turnout[turnout$GOTV_call == 0, ]$voted1998 == 1)))
+
+result2 = confint (DIFF, level=0.95)
+result2
+
+
+
+```
+
+```{r}
+#B
+cor1= do(10000)*cor(voted1998 ~ voted1996,
+data=resample(turnout))
+confint(cor1, level = 0.95)
+cor2= do(10000)*cor(GOTV_call ~ voted1996,
+data=resample(turnout))
+confint(cor2, level = 0.95)
+```
+
+```{r}
+cor3= do(10000)*cor(voted1998 ~ AGE,
+data=resample(turnout))
+confint(cor3, level = 0.95)
+cor4= do(10000)*cor(GOTV_call ~ AGE,
+data=resample(turnout))
+confint(cor4, level = 0.95)
+```
+
+```{r}
+cor5= do(10000)*cor(voted1998 ~ MAJORPTY,
+data=resample(turnout))
+confint(cor5, level = 0.95)
+cor6= do(10000)*cor(GOTV_call ~ MAJORPTY,
+data=resample(turnout))
+confint(cor6, level = 0.95)
+```
+
+```{r}
+gotv_match <- matchit(GOTV_call ~ voted1996 + AGE + MAJORPTY, 
+                      data = turnout, 
+                      ratio = 5)
+matched_data=match.data(gotv_match)
+```
+```{r}
+prop(matched_data[matched_data$GOTV_call == 1, ]$voted1998 == 1)
+
+prop(matched_data[matched_data$GOTV_call == 0, ]$voted1998 == 1)
+
+DIFF2 = do(5000)*(
+  prop(resample(matched_data[matched_data$GOTV_call == 1, ]$voted1998 == 1))-
+  prop(resample(matched_data[matched_data$GOTV_call == 0, ]$voted1998 == 1)))
+
+result3 = confint (DIFF2, level=0.95)
+result3
+```
+
+
+
