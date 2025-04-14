@@ -1,0 +1,60 @@
+---
+title: "HW8"
+author: "Joy Lin"
+date: "2025-04-14"
+output: html_document
+---
+
+```{r}
+
+creatinine <- read.csv("creatinine.csv")
+graph <- lm(creatclear~age, data= creatinine)
+
+coef(graph)
+147.81
+
+
+147.81 -.62*40
+147.81 -.62*60
+```
+
+```{r}
+library(mosaic)
+library(ggplot2)
+covid <- read.csv("covid.csv")
+
+Spain = covid[covid$country=="Spain",]
+Spain$deaths= log(Spain$deaths)
+Spain$days_since_first_death= log(Spain$days_since_first_death)
+Spain[is.infinite(Spain$days_since_first_death),]$days_since_first_death=0
+
+model= do(10000)*lm(deaths~days_since_first_death,data= resample(Spain))
+confint(model,level= .95)
+
+
+Italy = covid[covid$country=="Italy",]
+Italy$deaths= log(Italy$deaths)
+Italy$days_since_first_death= log(Italy$days_since_first_death)
+Italy[is.infinite(Italy$days_since_first_death),]$days_since_first_death=0
+
+model= do(10000)*lm(deaths~days_since_first_death,data= resample(Italy))
+confint(model,level= .95)
+
+ggplot(covid, aes(x = days_since_first_death, y = deaths, color = country)) +
+  geom_line(size = 1) +
+  labs(
+    title = "COVID-19 Deaths Italy vs Spain",
+    x = "Days Since First Death",
+    y = "Daily Deaths",
+    color = "Country"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+milk <- read.csv("milk.csv")
+model2= do(10000)*lm(log(sales)~log(price),data= resample(milk))
+confint(model2,level= .95)
+```
+
