@@ -1,0 +1,176 @@
+---
+title: "HW9"
+author: "Joy Lin Jl84785"
+date: "2025-04-21"
+output: html_document
+---
+
+
+# Question 1
+
+## Part A
+ 
+```{r echo=FALSE}
+suppressPackageStartupMessages(library(moderndive))
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(mosaic))
+suppressPackageStartupMessages(library(tidyverse))
+
+
+solder <- read.csv("solder.csv")
+solder$solder1<- ifelse(solder$Solder=="Thick", 1, 0)
+solder$Opening1[solder$Opening == 'L']=2
+solder$Opening1[solder$Opening == 'M']=1
+solder$Opening1[solder$Opening == 'S']=0
+
+ggplot(solder, aes(x = Opening1, y = skips)) + geom_point()+
+  geom_smooth(method= lm)+
+  labs(title = "Size of Opening vs Number of Skips")
+
+
+
+```
+
+```{r echo=FALSE}
+ggplot(solder, aes(x = solder1, y = skips)) +geom_point()+
+  geom_smooth(method= lm)+
+  labs(title = "Type of Solder vs Number of Skips")
+
+```
+
+
+
+## Part B
+
+```{r echo=FALSE}
+# model2= do(10000)*lm(skips ~ Opening1+ solder1+ Opening1:solder1, data=resample(solder))
+# confint(model2,level= .95)
+model1 = lm(skips ~ Opening1+ solder1+ Opening1:solder1, data=resample(solder))
+get_regression_table(model1)
+# lm(skips ~ Opening1, solder1, Opening1:solder1, data=solder)
+```
+
+## Part C
+
+Intercept = 16.049: Baseline when number of skips
+ and Solder are 0. 
+					
+Opening = -7.615: The change in number of skips when the opening increases a by size
+					
+Solder = -10.594: The change in number of skips when the alloy thickness increases from think to thick
+					
+Opening.Solder = 4.908: This is the change in number of skips when both
+ the opening size and solder changes.
+ 
+ 
+
+
+## Part D
+
+ It is better to have a large opening and use a thick Solder, because a larger opening has lower amount of skips and a thicker sodler has a lower amount of skips. 
+
+
+# Question 2
+
+## Part A
+
+```{r echo=FALSE}
+groceries <- read.csv("groceries.csv")
+groceries_sum = groceries%>%group_by(Store)%>% summarize(avg_price= mean(Price))
+ggplot(groceries_sum, aes(x=Store, y = avg_price))+geom_bar(stat= "identity")+coord_flip() + labs(Title ="Average Grocery Prices of Different Stores", y= "Average Prices", x = "Store")
+```
+
+## Part B
+
+```{r echo=FALSE}
+library(tidyverse)
+library(dplyr)
+# groceries <- groceries %>%
+#   mutate(Store = case_when(
+#     Store == "H-E-B" & Neighborhood == "Hancock" ~ "HEB1",
+#     Store == "H-E-B" & Neighborhood == "Downtown" ~ "HEB2",
+#     Store == "Whole Foods" & Neighborhood == "Hancock" ~ "WholeFoods1",
+#     Store == "Whole Foods" & Neighborhood == "Downtown" ~ "WholeFoods2",
+#     TRUE ~ Store
+#   ))
+groceries<-groceries %>% mutate(StoreUnique = paste(Store, Neighborhood, sep = "-"))
+
+```
+
+```{r echo=FALSE}
+groceries<-groceries %>% mutate(StoreUnique = paste(Store, Neighborhood, sep = "-"))
+
+groceries_sum1 = groceries%>%group_by(Product)%>% summarize(product_amount =n_distinct(StoreUnique))
+
+ggplot(groceries_sum1, aes(x=Product, y = product_amount))+geom_bar(stat= "identity")+coord_flip() + labs(Title ="Amount of Product", y= "Product Amount", x = "Product")+ylim(0,16)
+```
+
+
+## Part C
+
+```{r echo=FALSE}
+# groceries$Type <- relevel(groceries$Type, ref = "Grocery")
+# grocery_model<- lm
+groceries$Type <- factor(groceries$Type)
+groceries$Type <- relevel(groceries$Type, ref = "Grocery")
+
+groceries_lm <- lm(Price ~ Product + Type, data=groceries)
+get_regression_table(groceries_lm, conf.level = 0.95, digits=2)
+
+```
+
+Compared with ordinary grocery stores (like Albertsons, HEB, or Krogers), convenience stores charge somewhere between
+.41 and .92 dollars more for the same product.” 
+
+## Part D
+
+```{r echo=FALSE}
+# groceries$Price <- factor(groceries$Price)
+# groceries$Price <- relevel(groceries$Price, ref = "Grocery")
+groceries_lm1 <- lm(Price ~ StoreUnique + Product, data=groceries)
+
+get_regression_table(groceries_lm1, conf.level = 0.95, digits=2)
+
+```
+
+## Part E
+```{r echo=FALSE}
+groceries$Store <- as.factor(groceries$Store)
+groceries$Store <- relevel(groceries$Store, ref = "H-E-B ")
+groceries_model2 <- lm(Price ~ Store + Product, data=groceries)
+get_regression_table(groceries_model2, conf.level = 0.95, digits=2)
+
+```
+
+## Part F
+
+```{r echo=FALSE}
+groceries <- groceries %>%
+  mutate(Income10K = Income / 10000)
+model_income <- lm(Price ~ Product + Income10K, data = groceries)
+get_regression_table(model_income)
+
+```
+
+# Question 3
+
+## Part A 
+
+True because in the model A1, there is a positive correlation between Minority percentage and FAIR policies. The model has a 95% confidence interval and gave us a low p- value of 0 and an estimate (slope) between .009  to .018. The r^2 is also relatively high at around .516. This means that for every 1 percent increase in minority percentage, there is an increase of .009 and .018 FAIR policies per 100 houses.
+
+## Part B
+
+False, model B1 shows us a weak relationship between age and minority percentage. The estimate (slope) is .398, p value is .125 which is higher than the conventionally used .05, and the r^2 is very low at .05. This suggest there is no interaction between age and minority percentage affecting FAIR policies.
+
+## Part C
+
+True, in the model C1, the high fire risk group has a estimate of .01 with a p-value of .15 while the low fire risk group has an estimate of -.001 and a p value of .839. This would suggest that the high risk group has a stronger relationship between minority percentage and Fair Policies than the group with low risk since the high risk group has a p value of .015 which is lower than the conventionally used p value while the low risk has a p value of .938 which is higher than the .05.
+
+## Part D
+
+False, in model D2, the estimate for minority percentage is .01 and the p -value is .002. Income has a estimate as -.074 and a p value as .041. This means that income explains some of the correlation but not ALL of the correlation between minority percentage and FAIR policies.
+
+## Part E
+
+True, In model E, it shows that they have an relationship as the estimate is .008 and the p value is .006 which is lower than .05 meaning that it is statistically signifigant.
+
